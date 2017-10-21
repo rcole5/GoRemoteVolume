@@ -45,7 +45,9 @@ func setVolume(w http.ResponseWriter, r *http.Request) {
 	newVol, err := strconv.Atoi(params["vol"])
 	err = volume.SetVolume(newVol)
 	if err != nil {
-		log.Fatal("ERR: Cannot set volume")
+		volObj := (Response{Status: 500, Error: "Could not set volume."})
+		json.NewEncoder(w).Encode(volObj)
+		return
 	}
 
 	volObj := (Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}})
@@ -57,19 +59,25 @@ func setVolume(w http.ResponseWriter, r *http.Request) {
 func muteVolume(w http.ResponseWriter, r *http.Request) {
 	isMute, err := volume.GetMuted()
 	if err != nil {
-		log.Fatal("ERR: Cannot detect mute")
+		volObj := (Response{Status: 500, Error: "Could not detect mute."})
+		json.NewEncoder(w).Encode(volObj)
+		return
 	}
 
 	if isMute {
 		err = volume.Unmute()
 		if err != nil {
-			log.Fatalf("Not Unmute")
+			volObj := (Response{Status: 500, Error: "Could not unmute."})
+			json.NewEncoder(w).Encode(volObj)
+			return
 		}
 	} else {
 
 		err = volume.Mute()
 		if err != nil {
-			log.Fatalf("Not mute")
+			volObj := (Response{Status: 500, Error: "Could not mute."})
+			json.NewEncoder(w).Encode(volObj)
+			return
 		}
 	}
 
