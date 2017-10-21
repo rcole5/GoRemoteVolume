@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/itchyny/volume-go"
+	// "github.com/rs/cors"
 )
 
 type Vol struct {
@@ -94,6 +96,11 @@ func main() {
 	router.HandleFunc("/volume/{vol}", setVolume).Methods("GET")
 	router.HandleFunc("/mute", muteVolume).Methods("GET")
 
+	headersOk := handlers.AllowedHeaders([]string{"*"})
+	// originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
 	// Start server
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }
