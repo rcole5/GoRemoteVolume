@@ -1,0 +1,21 @@
+.rc-slider-handle {
+    background-color: black;
+    width: 175px;
+    height: 30px;
+    border-radius: 20%;
+}
+
+.rc-slider-vertical .rc-slider-handle {
+    margin-left: -85px;
+}
+
+.mute-btn {
+    text-align: center;
+    margin: 25px;
+    width: 105px;
+    height: 45px;
+    font-size: 25px;
+    background-color: #96dbfa;
+    box-shadow: none;
+    border: 1px solid black;
+}
