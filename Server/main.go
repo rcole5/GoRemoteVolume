@@ -36,7 +36,7 @@ func getCurrentVolume() (vol int) {
 // Returns the current volume
 // Value from 0-100
 func getVolume(w http.ResponseWriter, r *http.Request) {
-	volObj := (Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}})
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}}
 	json.NewEncoder(w).Encode(volObj)
 }
 
@@ -47,12 +47,12 @@ func setVolume(w http.ResponseWriter, r *http.Request) {
 	newVol, err := strconv.Atoi(params["vol"])
 	err = volume.SetVolume(newVol)
 	if err != nil {
-		volObj := (Response{Status: 500, Error: "Could not set volume."})
+		volObj := Response{Status: 500, Error: "Could not set volume."}
 		json.NewEncoder(w).Encode(volObj)
 		return
 	}
 
-	volObj := (Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}})
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}}
 	json.NewEncoder(w).Encode(volObj)
 }
 
@@ -61,7 +61,7 @@ func setVolume(w http.ResponseWriter, r *http.Request) {
 func muteVolume(w http.ResponseWriter, r *http.Request) {
 	isMute, err := volume.GetMuted()
 	if err != nil {
-		volObj := (Response{Status: 500, Error: "Could not detect mute."})
+		volObj := Response{Status: 500, Error: "Could not detect mute."}
 		json.NewEncoder(w).Encode(volObj)
 		return
 	}
@@ -69,7 +69,7 @@ func muteVolume(w http.ResponseWriter, r *http.Request) {
 	if isMute {
 		err = volume.Unmute()
 		if err != nil {
-			volObj := (Response{Status: 500, Error: "Could not unmute."})
+			volObj := Response{Status: 500, Error: "Could not unmute."}
 			json.NewEncoder(w).Encode(volObj)
 			return
 		}
@@ -77,13 +77,13 @@ func muteVolume(w http.ResponseWriter, r *http.Request) {
 
 		err = volume.Mute()
 		if err != nil {
-			volObj := (Response{Status: 500, Error: "Could not mute."})
+			volObj := Response{Status: 500, Error: "Could not mute."}
 			json.NewEncoder(w).Encode(volObj)
 			return
 		}
 	}
 
-	volObj := (Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: !isMute}})
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: !isMute}}
 	json.NewEncoder(w).Encode(volObj)
 }
 
@@ -97,7 +97,6 @@ func main() {
 	router.HandleFunc("/mute", muteVolume).Methods("GET")
 
 	headersOk := handlers.AllowedHeaders([]string{"*"})
-	// originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 

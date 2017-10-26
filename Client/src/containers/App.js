@@ -5,7 +5,7 @@ import AlertContainer from 'react-alert';
 import Slider from 'rc-slider';
 import './App.css';
 
-class App extends Component {
+class App extends React.Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
@@ -65,7 +65,7 @@ class App extends Component {
                 volume: response.data.data.volume,
                 mute: response.data.data.muted
             });
-        }).catch(function (response){
+        }).catch(function (response) {
             self.msg.error("Couldn't connect so server.")
         });
     };
