@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"syscall"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/itchyny/volume-go"
-	// "github.com/rs/cors"
 )
 
 type Vol struct {
@@ -23,6 +23,19 @@ type Response struct {
 	Data   Vol    `json:"data"`
 }
 
+var (
+	moduser32 = syscall.NewLazyDLL("user32.dll")
+	procKeyBd = moduser32.NewProc("keybd_event")
+)
+
+const (
+	_KEYEVENTF_KEYUP = 0x0002
+	_KEY_PLAY_PAUSE = 0xB3
+	_KEY_TRACK_NEXT = 0xB0
+	_KEY_TRACK_PREV = 0xB1
+	_KEY_TRACK_STOP = 0xB2
+)
+
 // Returns the current volume.
 func getCurrentVolume() (vol int) {
 	vol, err := volume.GetVolume()
@@ -31,6 +44,34 @@ func getCurrentVolume() (vol int) {
 	}
 
 	return vol
+}
+
+// Play a track if it's paused
+// Pause a track if it's playing
+func playPause(w http.ResponseWriter, r *http.Request) {
+	sendKey(_KEY_PLAY_PAUSE)
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}}
+	json.NewEncoder(w).Encode(volObj)
+}
+
+// Play the next track
+func nextTrack(w http.ResponseWriter, r *http.Request) {
+	sendKey(_KEY_TRACK_NEXT)
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}}
+	json.NewEncoder(w).Encode(volObj)
+}
+
+// Play the previous track
+func prevTrack(w http.ResponseWriter, r *http.Request) {
+	sendKey(_KEY_TRACK_PREV)
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}}
+	json.NewEncoder(w).Encode(volObj)
+}
+
+func stopTrack(w http.ResponseWriter, r *http.Request) {
+	sendKey(_KEY_TRACK_STOP)
+	volObj := Response{Status: 200, Data: Vol{Volume: getCurrentVolume(), Muted: false}}
+	json.NewEncoder(w).Encode(volObj)
 }
 
 // Returns the current volume
@@ -87,6 +128,24 @@ func muteVolume(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(volObj)
 }
 
+// Send a key down and key up call to system
+func sendKey(vk int) {
+	downKey(vk)
+	upKey(vk)
+}
+
+// Call key down to system
+func downKey(key int) {
+	vkey := key + 0x80
+	procKeyBd.Call(uintptr(key), uintptr(vkey), 0, 0)
+}
+
+// Call key up to system
+func upKey(key int) {
+	vkey := key + 0x80
+	procKeyBd.Call(uintptr(key), uintptr(vkey), _KEYEVENTF_KEYUP, 0)
+}
+
 func main() {
 	// Create new Router
 	router := mux.NewRouter()
@@ -95,6 +154,10 @@ func main() {
 	router.HandleFunc("/", getVolume).Methods("GET")
 	router.HandleFunc("/volume/{vol}", setVolume).Methods("GET")
 	router.HandleFunc("/mute", muteVolume).Methods("GET")
+	router.HandleFunc("/playpause", playPause).Methods("GET")
+	router.HandleFunc("/next", nextTrack).Methods("GET")
+	router.HandleFunc("/prev", prevTrack).Methods("GET")
+	router.HandleFunc("/stop", stopTrack).Methods("GET")
 
 	headersOk := handlers.AllowedHeaders([]string{"*"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})

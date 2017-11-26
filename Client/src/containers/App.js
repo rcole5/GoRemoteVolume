@@ -11,7 +11,7 @@ class App extends React.Component {
         this.state = {
             volume: 100,
             mute: false,
-            url: 'http://192.168.1.9:8080'
+            url: 'http://192.168.1.2:8080',
         };
 
         this.alertOptions = {
@@ -35,7 +35,7 @@ class App extends React.Component {
             });
         }).catch(function (response) {
             self.msg.removeAll();
-            self.msg.error("Couldn't connect so server.")
+            self.msg.error("Couldn't connect to server.");
         });
     };
 
@@ -44,7 +44,7 @@ class App extends React.Component {
         axios.get(self.state.url + '/volume/' + self.state.volume).then(function (response) {
         }).catch(function (response) {
             self.msg.removeAll();
-            self.msg.error("Couldn't connect so server.")
+            self.msg.error("Couldn't connect to server.");
         });
     };
 
@@ -54,7 +54,43 @@ class App extends React.Component {
             self.setState({mute: !self.state.mute});
         }).catch(function (response) {
             self.msg.removeAll();
-            self.msg.error("Couldn't connect so server.")
+            self.msg.error("Couldn't connect to server.");
+        });
+    };
+
+    handlePlayPause = () => {
+        const self = this;
+        axios.get(self.state.url + '/playpause').then(function (Response) {
+        }).catch(function (Response) {
+            self.msg.removeAll();
+            self.msg.errer("Couldn't connct to server");
+        });
+    };
+
+    handleNextTrack = () => {
+        const self = this;
+        axios.get(self.state.url + '/next').then(function (Response) {
+        }).catch(function (Response) {
+            self.msg.removeAll();
+            self.msg.errer("Couldn't connct to server");
+        });
+    };
+
+    handlePrevTrack = () => {
+        const self = this;
+        axios.get(self.state.url + '/prev').then(function (Response) {
+        }).catch(function (Response) {
+            self.msg.removeAll();
+            self.msg.errer("Couldn't connct to server");
+        });
+    };
+
+    handleStopTrack = () => {
+        const self = this;
+        axios.get(self.state.url + '/stop').then(function (Response) {
+        }).catch(function (Response) {
+            self.msg.removeAll();
+            self.msg.errer("Couldn't connct to server");
         });
     };
 
@@ -92,6 +128,16 @@ class App extends React.Component {
                 <div style={centerStyle}>
                     <button className="mute-btn"
                             onClick={this.handleMute}>{this.state.mute ? "Unmute" : "Mute" }</button>
+                    <button className="mute-btn"
+                            onClick={this.handleStopTrack}>Stop</button>
+                </div>
+                <div style={centerStyle}>
+                    <button className="mute-btn"
+                            onClick={this.handlePrevTrack}>Prev</button>
+                    <button className="mute-btn"
+                            onClick={this.handlePlayPause}>Play/Pause</button>
+                    <button className="mute-btn"
+                            onClick={this.handleNextTrack}>Next</button>
                 </div>
             </div>
         )
